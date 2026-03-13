@@ -18,6 +18,7 @@ class ConfigProvider
                 'db.connector.doris_catalog_mysql' => DorisMysqlConnector::class,
                 'db.connector.doris_catalog_pgsql' => DorisMysqlConnector::class,
                 'db.connector.doris_catalog_sqlsrv' => DorisMysqlConnector::class,
+                'db.connector.doris_catalog_oracle' => DorisMysqlConnector::class,
             ],
             'listeners' => [
                 RegisterConnectionListener::class,

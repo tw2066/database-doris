@@ -6,6 +6,7 @@ namespace Hyperf\Database\Doris\Listener;
 
 use Hyperf\Database\Connection;
 use Hyperf\Database\Doris\MysqlCatalogConnection;
+use Hyperf\Database\Doris\OracleSqlCatalogConnection;
 use Hyperf\Database\Doris\PostgresSqlCatalogConnection;
 use Hyperf\Database\Doris\SqlServerCatalogConnection;
 use Hyperf\Database\MySqlConnection;
@@ -55,6 +56,10 @@ class RegisterConnectionListener implements ListenerInterface
 
         Connection::resolverFor('doris_catalog_sqlsrv', function ($connection, $database, $prefix, $config) {
             return new SqlServerCatalogConnection($connection, $database, $prefix, $config);
+        });
+
+        Connection::resolverFor('doris_catalog_oracle', static function ($connection, $database, $prefix, $config) {
+            return new OracleSqlCatalogConnection($connection, $database, $prefix, $config);
         });
     }
 }
