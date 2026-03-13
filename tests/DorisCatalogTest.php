@@ -69,7 +69,7 @@ class DorisCatalogTest extends TestCase
         try {
             Db::connection('doris_catalog_mysql')->beginTransaction();
             GoodsDorisCatalog::query()->where('id', 2)->update($data);
-            GoodsDorisCatalog::query()->where('id2', 0)->delete();
+            throw new \RuntimeException('error');
             Db::connection('doris_catalog_mysql')->commit();
         } catch (Throwable $throwable) {
             Db::connection('doris_catalog_mysql')->rollBack();
