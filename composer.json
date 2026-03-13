@@ -4,19 +4,13 @@
     "license": "MIT",
     "type": "library",
     "keywords": [
-        "catalog",
         "doris",
-        "swoole",
+        "catalog",
         "hyperf",
-        "database"
+        "database",
+        "swoole"
     ],
     "homepage": "https://hyperf.io",
-    "support": {
-        "issues": "https://github.com/hyperf/hyperf/issues",
-        "source": "https://github.com/hyperf/hyperf",
-        "docs": "https://hyperf.wiki",
-        "pull-request": "https://github.com/hyperf/hyperf/pulls"
-    },
     "require": {
         "php": ">=8.1",
         "hyperf/database": "~3.1.0"
@@ -36,7 +30,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "3.1-dev"
+            "dev-master": "0.1-dev"
         },
         "hyperf": {
             "config": "Hyperf\\Database\\Doris\\ConfigProvider"
