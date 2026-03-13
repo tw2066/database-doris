@@ -25,10 +25,16 @@ class DorisCatalogTest extends TestCase
     public function mysql()
     {
         // 查询
+        /** @var GoodsDorisCatalog $first */
         $first = GoodsDorisCatalog::query()
             ->where('id', 1)
             ->first();
         $this->assertNotNull($first);
+
+        $goods_id = rand(1, 10000);
+        $first->goods_id = $goods_id;
+        $first->save();
+        $this->assertEquals($first->goods_id, $goods_id);
 
         // 修改
         $data['goods_id'] = rand(1, 10000);

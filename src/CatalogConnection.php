@@ -15,6 +15,8 @@ trait CatalogConnection
     {
         if ($this->config['passthrough_sql_select'] ?? true) {
             [$query, $bindings] = $this->buildSql($query, $bindings);
+            $catalog = $this->config['catalog'];
+            $query = "SELECT * FROM QUERY('catalog' = '{$catalog}', 'query' = '{$query}')";
         }
         return parent::select($query, $bindings, $useReadPdo);
     }

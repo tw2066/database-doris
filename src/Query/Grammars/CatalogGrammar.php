@@ -14,7 +14,6 @@ trait CatalogGrammar
     public function compileSelect(Builder $query): string
     {
         $config = $this->getConfig($query);
-        $catalog = $config['catalog'];
         // sql 透传
         $passthroughSQL = $config['passthrough_sql_select'] ?? true;
         if (! str_contains($query->from, '.')) {
@@ -24,12 +23,7 @@ trait CatalogGrammar
                 $query->from = $config['catalog'] . '.' . $config['database'] . '.' . $query->from;
             }
         }
-        $sql = parent::compileSelect($query);
-        if ($passthroughSQL) {
-            $sql = "SELECT * FROM QUERY('catalog' = '{$catalog}', 'query' = '{$sql}')";
-        }
-
-        return $sql;
+        return parent::compileSelect($query);
     }
 
     public function compileUpdate(Builder $query, array $values): string
