@@ -7,6 +7,7 @@ namespace HyperfTest\Database\Doris;
 use App\Model\GoodsDorisCatalog;
 use Hyperf\DbConnection\Db;
 use PHPUnit\Framework\TestCase;
+use Throwable;
 
 /**
  * @internal
@@ -16,13 +17,14 @@ class DorisCatalogTest extends TestCase
 {
     public function index()
     {
+        $this->transaction();
         $this->mysql();
         $this->es();
         $this->sqlsrv();
         $this->pgsql();
     }
 
-    public function mysql()
+    public function mysql(): void
     {
         // 查询
         /** @var GoodsDorisCatalog $first */
@@ -43,7 +45,7 @@ class DorisCatalogTest extends TestCase
         $this->assertEquals($data['goods_id'], $data['goods_id']);
 
         // 插入
-        $goodsId = time();
+        $goodsId = time() + 1;
         $result = GoodsDorisCatalog::query()
             ->insert([
                 'goods_id' => $goodsId,
@@ -58,6 +60,34 @@ class DorisCatalogTest extends TestCase
         GoodsDorisCatalog::query()->where('goods_id', $goodsId)->delete();
         $count = GoodsDorisCatalog::query()->where('goods_id', $goodsId)->count();
         $this->assertEquals($count, 0);
+    }
+
+    protected function transaction(): void
+    {
+        $data['goods_id'] = time();
+        // 异常会滚情况
+        try {
+            Db::connection('doris_catalog_mysql')->beginTransaction();
+            GoodsDorisCatalog::query()->where('id', 2)->update($data);
+            GoodsDorisCatalog::query()->where('id2', 0)->delete();
+            Db::connection('doris_catalog_mysql')->commit();
+        } catch (Throwable $throwable) {
+            Db::connection('doris_catalog_mysql')->rollBack();
+        }
+        $goods_id = GoodsDorisCatalog::query()->where('id', 2)->pluck('goods_id')->get(0);
+        $this->assertNotEquals($goods_id, $data['goods_id']);
+
+        // 正常提交情况
+        Db::connection('doris_catalog_mysql')->transaction(function () use ($data) {
+            GoodsDorisCatalog::query()->where('id', 2)->update($data);
+            // 不支持事务隔离查询
+            // $goods_id = GoodsDorisCatalog::query()->where('id', 2)->pluck('goods_id');
+            GoodsDorisCatalog::query()->where('id', 0)->delete();
+        });
+
+        $goods_id = GoodsDorisCatalog::query()->where('id', 2)->pluck('goods_id')->get(0);
+
+        $this->assertEquals($goods_id, $data['goods_id']);
     }
 
     protected function es(): void

@@ -4,11 +4,11 @@
     "license": "MIT",
     "type": "library",
     "keywords": [
-        "php",
+        "catalog",
+        "doris",
         "swoole",
         "hyperf",
-        "database",
-        "doris"
+        "database"
     ],
     "homepage": "https://hyperf.io",
     "support": {
