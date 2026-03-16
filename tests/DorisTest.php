@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace HyperfTest\Database\Doris;
 
 use App\Model\GoodsDoris;
-use App\Model\GoodsDorisCatalog;
-use Hyperf\DbConnection\Db;
 use PHPUnit\Framework\TestCase;
 
 /**

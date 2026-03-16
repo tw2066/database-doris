@@ -19,9 +19,4 @@ class PostgresSqlCatalogConnection extends PostgreSqlConnection
         /* @phpstan-ignore-next-line */
         return $this->withTablePrefix(new PostgresCatalogGrammar());
     }
-
-    protected function getDefaultType($value): string
-    {
-        return sprintf("\\'%s\\'", addslashes($value));
-    }
 }

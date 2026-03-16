@@ -21,9 +21,24 @@ trait CatalogConnection
         return parent::select($query, $bindings, $useReadPdo);
     }
 
+    public function insert(string $query, array $bindings = []): bool
+    {
+        if ($this->config['passthrough_sql_insert'] ?? true) {
+            [$query, $bindings] = $this->buildSql($query, $bindings);
+            $catalog = $this->config['catalog'];
+            $query = "CALL EXECUTE_STMT('{$catalog}', '{$query}')";
+        }
+        return parent::insert($query, $bindings);
+    }
+
+    /**
+     * 更新和删除语句.
+     */
     public function affectingStatement(string $query, array $bindings = []): int
     {
         [$query, $bindings] = $this->buildSql($query, $bindings);
+        $catalog = $this->config['catalog'];
+        $query = "CALL EXECUTE_STMT('{$catalog}', '{$query}')";
         return parent::affectingStatement($query, $bindings);
     }
 
@@ -63,6 +78,6 @@ trait CatalogConnection
 
     protected function getDefaultType($value): string
     {
-        return sprintf('"%s"', addslashes($value));
+        return sprintf("\\'%s\\'", addslashes($value));
     }
 }

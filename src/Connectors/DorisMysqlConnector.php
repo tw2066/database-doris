@@ -18,7 +18,7 @@ class DorisMysqlConnector extends MySqlConnector
     {
         $dorisConfig = $config;
 
-        if (! empty($config['catalog'])){
+        if (! empty($config['catalog'])) {
             unset($dorisConfig['database']);
         }
 
@@ -32,9 +32,9 @@ class DorisMysqlConnector extends MySqlConnector
         // connection's behavior, and some might be specified by the developers.
         $connection = $this->createConnection($dsn, $config, $options);
 
-         if (! empty($dorisConfig['database'])) {
+        if (! empty($dorisConfig['database'])) {
             $connection->exec("use `{$dorisConfig['database']}`;");
-         }
+        }
 
         $this->configureEncoding($connection, $config);
 

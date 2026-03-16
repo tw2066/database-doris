@@ -19,9 +19,4 @@ class SqlServerCatalogConnection extends SqlServerConnection
         /* @phpstan-ignore-next-line */
         return $this->withTablePrefix(new SqlServerCatalogGrammar());
     }
-
-    protected function getDefaultType($value): string
-    {
-        return sprintf("\\'%s\\'", addslashes($value));
-    }
 }

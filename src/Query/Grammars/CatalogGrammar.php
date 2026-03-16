@@ -29,23 +29,19 @@ trait CatalogGrammar
     public function compileUpdate(Builder $query, array $values): string
     {
         $config = $this->getConfig($query);
-        $catalog = $config['catalog'];
         if (! str_contains($query->from, '.')) {
             $query->from = $config['database'] . '.' . $query->from;
         }
-        $sql = parent::compileUpdate($query, $values);
-        return "CALL EXECUTE_STMT('{$catalog}', '{$sql}')";
+        return parent::compileUpdate($query, $values);
     }
 
     public function compileDelete(Builder $query): string
     {
         $config = $this->getConfig($query);
-        $catalog = $config['catalog'];
         if (! str_contains($query->from, '.')) {
             $query->from = $config['database'] . '.' . $query->from;
         }
-        $sql = parent::compileDelete($query);
-        return "CALL EXECUTE_STMT('{$catalog}', '{$sql}')";
+        return parent::compileDelete($query);
     }
 
     /**
@@ -54,7 +50,15 @@ trait CatalogGrammar
     public function compileInsert(Builder $query, array $values): string
     {
         $config = $this->getConfig($query);
-        $query->from = $config['catalog'] . '.' . $config['database'] . '.' . $query->from;
+        // sql 透传
+        $passthroughSQL = $config['passthrough_sql_insert'] ?? true;
+        if (! str_contains($query->from, '.')) {
+            if ($passthroughSQL) {
+                $query->from = $config['database'] . '.' . $query->from;
+            } else {
+                $query->from = $config['catalog'] . '.' . $config['database'] . '.' . $query->from;
+            }
+        }
         return parent::compileInsert($query, $values);
     }
 

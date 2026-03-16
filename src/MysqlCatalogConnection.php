@@ -24,4 +24,9 @@ class MysqlCatalogConnection extends MySqlConnection
         /* @phpstan-ignore-next-line */
         return $this->withTablePrefix(new MysqlCatalogGrammar());
     }
+
+    protected function getDefaultType($value): string
+    {
+        return sprintf('"%s"', addslashes($value));
+    }
 }

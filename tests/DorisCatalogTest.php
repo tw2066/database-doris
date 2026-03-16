@@ -7,6 +7,7 @@ namespace HyperfTest\Database\Doris;
 use App\Model\GoodsDorisCatalog;
 use Hyperf\DbConnection\Db;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -22,6 +23,7 @@ class DorisCatalogTest extends TestCase
         $this->es();
         $this->sqlsrv();
         $this->pgsql();
+        $this->oracle();
     }
 
     public function mysql(): void
@@ -39,10 +41,10 @@ class DorisCatalogTest extends TestCase
         $this->assertEquals($first->goods_id, $goods_id);
 
         // 修改
-        $data['goods_id'] = rand(1, 10000);
+        $data['goods_id'] = -1;
         GoodsDorisCatalog::query()->where('id', 1)->update($data);
-        $data = GoodsDorisCatalog::query()->where('id', 1)->first();
-        $this->assertEquals($data['goods_id'], $data['goods_id']);
+        $row = GoodsDorisCatalog::query()->where('id', 1)->first();
+        $this->assertEquals($data['goods_id'], $row->goods_id);
 
         // 插入
         $goodsId = time() + 1;
@@ -69,7 +71,7 @@ class DorisCatalogTest extends TestCase
         try {
             Db::connection('doris_catalog_mysql')->beginTransaction();
             GoodsDorisCatalog::query()->where('id', 2)->update($data);
-            throw new \RuntimeException('error');
+            throw new RuntimeException('error');
             Db::connection('doris_catalog_mysql')->commit();
         } catch (Throwable $throwable) {
             Db::connection('doris_catalog_mysql')->rollBack();
@@ -105,22 +107,70 @@ class DorisCatalogTest extends TestCase
 
     protected function sqlsrv(): void
     {
-        $data = Db::connection('doris_sqlsrv')->table('spzl')
-            ->limit(5)
-            ->get();
-        $this->assertNotEmpty($data);
-        $count = Db::connection('doris_sqlsrv')->table('spzl')->count();
-        $this->assertTrue($count > 0);
+        Db::connection('doris_sqlsrv')->table('Users')->where('UserName', 'sqlsrv')->delete();
+
+        $insert = [
+            ['UserName' => 'sqlsrv', 'Email' => '1@a.com'],
+        ];
+        Db::connection('doris_sqlsrv')->table('Users')->insert($insert);
+
+        $update['Email'] = '2@a.com';
+        Db::connection('doris_sqlsrv')->table('Users')->where('UserName', 'sqlsrv')->update($update);
+
+        $data = Db::connection('doris_sqlsrv')->table('Users')
+            ->where('UserName', 'sqlsrv')
+            ->first();
+        $this->assertEquals($data->Email, '2@a.com');
+
+        Db::connection('doris_sqlsrv')->table('Users')->where('UserName', 'sqlsrv')->delete();
+
+        $count = Db::connection('doris_sqlsrv')->table('Users')->where('UserName', 'sqlsrv')->count();
+        $this->assertEquals($count, 0);
     }
 
     protected function pgsql(): void
     {
-        $data = Db::connection('doris_pg')->table('view_user')
-            ->where('fnumber', 'WNO_10')
-            ->orderBy('fid', 'desc')
+        $username = '12345';
+        Db::connection('doris_pg')->table('user_info')->where('username', $username)->delete();
+        $insert = [
+            ['username' => $username, 'email' => '55@aa.com'],
+        ];
+        Db::connection('doris_pg')->table('user_info')->insert($insert);
+        $update = ['email' => '66@aa.com'];
+        Db::connection('doris_pg')->table('user_info')->where('username', $username)->update($update);
+
+        $data = Db::connection('doris_pg')->table('user_info')
+            ->where('username', $username)
             ->first();
-        $this->assertNotEmpty($data);
-        $count = Db::connection('doris_pg')->table('view_user')->count();
-        $this->assertTrue($count > 0);
+        $this->assertEquals($data->email, '66@aa.com');
+        Db::connection('doris_pg')->table('user_info')->where('username', $username)->delete();
+        $count = Db::connection('doris_pg')->table('user_info')->count();
+        $this->assertEquals($count, 0);
+    }
+
+    protected function oracle(): void
+    {
+        $dwbh = '12345';
+        $insert = [
+            ['DWBH' => $dwbh, 'OLDCODE' => '55'],
+        ];
+        Db::connection('doris_catalog_oracle')->table('A_BOLD')->insert($insert);
+
+        $oldcode = '54321';
+        $update = ['OLDCODE' => $oldcode];
+        Db::connection('doris_catalog_oracle')->table('A_BOLD')->where('DWBH', $dwbh)->update($update);
+
+        $row = Db::connection('doris_catalog_oracle')->table('A_BOLD')
+            ->where('DWBH', $dwbh)
+            ->orderBy('DWBH', 'desc')
+            ->first();
+        $this->assertNotEmpty($row);
+        $this->assertEquals($oldcode, $row->OLDCODE);
+
+        Db::connection('doris_catalog_oracle')->table('A_BOLD')->where('DWBH', $dwbh)->delete();
+        $count = Db::connection('doris_catalog_oracle')->table('A_BOLD')
+            ->where('DWBH', $dwbh)
+            ->count();
+        $this->assertEquals($count, 0);
     }
 }

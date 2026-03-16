@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hyperf\Database\Doris\Listener;
 
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Database\Connection;
 use Hyperf\Database\Doris\MysqlCatalogConnection;
 use Hyperf\Database\Doris\OracleSqlCatalogConnection;
@@ -19,7 +20,7 @@ class RegisterConnectionListener implements ListenerInterface
     /**
      * Create a new connection factory instance.
      */
-    public function __construct(protected ContainerInterface $container)
+    public function __construct(protected ContainerInterface $container, private ConfigInterface $config)
     {
     }
 
@@ -35,14 +36,22 @@ class RegisterConnectionListener implements ListenerInterface
      */
     public function process(object $event): void
     {
+        $databases = $this->config->get('databases');
+        foreach ($databases as $name => $database) {
+            if ($database['driver'] == 'doris_catalog') {
+                ! isset($database['passthrough_sql_select']) && $this->config->set("databases.{$name}.passthrough_sql_select", false);
+            }
+            if ($database['driver'] == 'doris_catalog_mysql') {
+                ! isset($database['passthrough_sql_insert']) && $this->config->set("databases.{$name}.passthrough_sql_insert", false);
+            }
+        }
+
         Connection::resolverFor('doris', function ($connection, $database, $prefix, $config) {
             // 使用mysql连接协议,和mysql查询协议一致
             return new MySqlConnection($connection, $database, $prefix, $config);
         });
 
         Connection::resolverFor('doris_catalog', function ($connection, $database, $prefix, $config) {
-            // 默认不透传sql
-            $config['passthrough_sql_select'] = $config['passthrough_sql_select'] ?? false;
             return new MysqlCatalogConnection($connection, $database, $prefix, $config);
         });
 

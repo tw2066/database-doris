@@ -19,9 +19,4 @@ class OracleSqlCatalogConnection extends OracleSqlConnection
         /* @phpstan-ignore-next-line */
         return $this->withTablePrefix(new OracleCatalogGrammar());
     }
-
-    //protected function getDefaultType($value): string
-    //{
-    //    return sprintf("\\'%s\\'", addslashes($value));
-    //}
 }
