@@ -18,7 +18,7 @@ class DorisMysqlConnector extends MySqlConnector
     {
         $dorisConfig = $config;
 
-        if (! empty($config['catalog'])) {
+        if ($config['driver'] != 'doris') {
             unset($dorisConfig['database']);
         }
 

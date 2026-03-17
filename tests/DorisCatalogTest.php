@@ -18,15 +18,15 @@ class DorisCatalogTest extends TestCase
 {
     public function index()
     {
-        $this->transaction();
-        $this->mysql();
-        $this->es();
-        $this->sqlsrv();
-        $this->pgsql();
-        $this->oracle();
+        $this->testTransaction();
+        $this->testMysql();
+        $this->testEs();
+        $this->testSqlsrv();
+        $this->testPgsql();
+        $this->testOracle();
     }
 
-    public function mysql(): void
+    public function testMysql(): void
     {
         // 查询
         /** @var GoodsDorisCatalog $first */
@@ -64,7 +64,7 @@ class DorisCatalogTest extends TestCase
         $this->assertEquals($count, 0);
     }
 
-    protected function transaction(): void
+    public function testTransaction(): void
     {
         $data['goods_id'] = time();
         // 异常会滚情况
@@ -92,7 +92,7 @@ class DorisCatalogTest extends TestCase
         $this->assertEquals($goods_id, $data['goods_id']);
     }
 
-    protected function es(): void
+    public function testEs(): void
     {
         $count = Db::connection('doris_es')->table('jc_order_103')
             ->where(function ($query) {
@@ -105,7 +105,7 @@ class DorisCatalogTest extends TestCase
         $this->assertTrue($count > 0);
     }
 
-    protected function sqlsrv(): void
+    public function testSqlsrv(): void
     {
         Db::connection('doris_sqlsrv')->table('Users')->where('UserName', 'sqlsrv')->delete();
 
@@ -128,7 +128,7 @@ class DorisCatalogTest extends TestCase
         $this->assertEquals($count, 0);
     }
 
-    protected function pgsql(): void
+    public function testPgsql(): void
     {
         $username = '12345';
         Db::connection('doris_pg')->table('user_info')->where('username', $username)->delete();
@@ -148,7 +148,7 @@ class DorisCatalogTest extends TestCase
         $this->assertEquals($count, 0);
     }
 
-    protected function oracle(): void
+    public function testOracle(): void
     {
         $dwbh = '12345';
         $insert = [
